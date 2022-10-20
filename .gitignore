@@ -11,3 +11,5 @@ tc*
 tc*
 outputs*
 
+venv/
+.vscode/

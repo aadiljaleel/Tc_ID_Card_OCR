@@ -133,7 +133,7 @@ class UnetBackBones(ABC):
         pass
 
 class Res34BackBone(UnetBackBones):
-    
+
     def load_model(self, device):
         model = smp.Unet(encoder_name="resnet34" , encoder_weights="imagenet", in_channels=3, classes = 1)
         model.load_state_dict(torch.load('model/resnet34/UNet_sig.pth',map_location = device))
@@ -141,32 +141,32 @@ class Res34BackBone(UnetBackBones):
         return model
 
     def predict(self, model, input_img, device):
-        
+
         img = torch.tensor(input_img)
         img = img.permute((2, 0, 1)).unsqueeze(0).float()
-    
+
         img = img.to(device)
         output = model(img)
         output= output.squeeze(0)
         output[output>0.0] = 1.0
         output[output<=0.0] = 0
         output = output.squeeze(0)
-        
+
         predicted_mask = output.detach().cpu().numpy()
-                
+
         return np.uint8(predicted_mask)
 
 class Res50BackBone(UnetBackBones):
-    
+
     def load_model(self, device):
-        
+
         model = smp.Unet(encoder_name="resnet50", encoder_weights="imagenet", in_channels=3, classes = 1)
         model.load_state_dict(torch.load('model/resnet50/UNet.pth'))
         model = model.to(device)
         return model
 
     def predict(self, model, input_img, device):
-        
+
         input_tensor = torch.tensor(input_img)
         input_tensor = input_tensor.permute((2, 0, 1)).unsqueeze(0).float().to(device)
 
@@ -175,21 +175,21 @@ class Res50BackBone(UnetBackBones):
         output[output>0.0] = 1.0
         output[output<=0.0] = 0
         output = output.squeeze(0)
-        
+
         predicted_mask = output.detach().cpu().numpy()
-                
+
         return np.uint8(predicted_mask)
 
 class Vgg13BackBone(UnetBackBones):
-    
+
     def load_model(self, device):
-        
+
         model = smp.Unet(encoder_name="vgg13", encoder_weights="imagenet", in_channels=3, classes = 1)
         model.load_state_dict(torch.load('model/vgg13/UNet.pth'))
         model = model.to(device)
-    
+
     def predict(self, model, input_img, device):
-        
+
         input_tensor = torch.tensor(input_img)
         input_tensor = input_tensor.permute((2, 0, 1)).unsqueeze(0).float().to(device)
 
@@ -198,13 +198,13 @@ class Vgg13BackBone(UnetBackBones):
         output[output>0.0] = 1.0
         output[output<=0.0] = 0
         output = output.squeeze(0)
-        
+
         predicted_mask = output.detach().cpu().numpy()
-                
+
         return np.uint8(predicted_mask)
 
 class NoBackBone(UnetBackBones):
-    
+
     def load_model(self, device):
         model = UNET()
         model.load_state_dict(torch.load('model/orig_unet/unetModel_20.pth'))
@@ -219,30 +219,30 @@ class NoBackBone(UnetBackBones):
         output[output>0.0] = 1.0
         output[output<=0.0]= 0
         output = output.squeeze(0)
-        
+
         predicted_mask = output.detach().cpu().numpy()
-        
+
         return np.uint8(predicted_mask)
 
 class UnetModel:
     """
     The Unet model takes the character density map image
-    and returns the masks of the ID card number, first name, 
+    and returns the masks of the ID card number, first name,
     surname and date of birth regions on this image.
-    The Unet model was trained with 3 different backbones, 
+    The Unet model was trained with 3 different backbones,
     the most successful of which was obtained from the resnet34 backbone.
     """
 
     def __init__(self, backbone:UnetBackBones = Res34BackBone(), device = "cuda"):
         self.device = device
         self.backbone = backbone
-        
+
 
     def predict(self,input_img):
-        
+
         model = self.backbone.load_model(self.device)
         predicted_mask = self.backbone.predict(model, input_img, self.device)
-        
+
         return predicted_mask
 
-    
+
