@@ -119,16 +119,19 @@ class EasyOcr(OcrMethod):
         """
         crop_img_names = self.cropRoi(img, bbox, self.denoise)
 
-        id_infos= ["Tc", "Surname", "Name", "DateofBirth"]
+        id_infos= ["Name", "Father Name", "Gender", "NIC Number"]
         jsonData = JsonData()
-        text_output = {"Tc":"", "Surname":"", "Name":"", "DateofBirth":""}
+        text_output = {"Name":"", "Father Name":"", "Gender": "", "NIC Number":""}
+        # id_infos= ["Tc", "Surname", "Name", "DateofBirth"]
+        # jsonData = JsonData()
+        # text_output = {"Tc":"", "Surname":"", "Name":"", "DateofBirth":""}
         for info, img  in zip(id_infos, crop_img_names):
             result = self.reader.readtext(img)
             if(len(result)):
                 box, text, prob = result[0]
                 text_output[info] = text.upper()
 
-        text_output["DateofBirth"] = self.getonlyDigits(text_output["DateofBirth"])
+        # text_output["DateofBirth"] = self.getonlyDigits(text_output["DateofBirth"])
 
         CardInfo[img_name] = text_output
         jsonData.saveDict(CardInfo)
@@ -146,9 +149,9 @@ class TesseractOcr(OcrMethod):
         it saves the txt outputs as a json format
         """
         crop_img_names = self.cropRoi(img, bbox, self.denoise)
-        id_infos= ["Tc", "Surname", "Name", "DateofBirth"]
+        id_infos= ["Name", "Surname", "Gender", "NIC Number"]
         jsonData = JsonData()
-        text_output = {"Tc":"", "Surname":"", "Name":"", "DateofBirth":""}
+        text_output = {"Name":"", "Surname":"", "Gender": "", "NIC Number":""}
         for info, img  in zip(id_infos, crop_img_names):
             text = pytesseract.image_to_string(img)
 

@@ -28,6 +28,9 @@ import detect_face
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 500
 
+IMG_WIDTH = 800
+IMG_HEIGHT = 500
+
 DEFAULT_SPACING = 4
 DEFAULT_PADDING = 8
 
@@ -35,14 +38,14 @@ DEFAULT_PADDING = 8
 def get_scaled_image(img: QtG.QImage) -> QtG.QImage:
     width, height = img.width(), img.height()
 
-    if width > WINDOW_WIDTH * 0.8 or height > WINDOW_HEIGHT * 0.75:
+    if width > IMG_WIDTH * 0.8 or height > IMG_HEIGHT * 0.75:
         if width > height:
-            new_width = WINDOW_WIDTH * 0.8
+            new_width = IMG_WIDTH * 0.8
             new_height = (height / width) * new_width
 
             return img.scaledToWidth(new_width, QtC.Qt.TransformationMode.SmoothTransformation)
         else:
-            new_height = WINDOW_HEIGHT * 0.75
+            new_height = IMG_HEIGHT * 0.75
             new_width = (width / height) * new_height
             width, height = new_width, new_height
 
@@ -214,6 +217,23 @@ def id_card_ocr(cv2_img, neighbor_box_distance: float, rotation_interval: int, f
     return final_img, np.multiply(predicted_mask, 255), PersonInfo
 
 
+def cv2_img_to_QImage(cv2_img) -> QtG.QImage:
+    is_grayscale = len(cv2_img.shape) == 2
+    height, width = cv2_img.shape[0], cv2_img.shape[1]
+    bytes_per_line = width
+    if len(cv2_img.shape) == 3:
+        bytes_per_line *= cv2_img.shape[2]
+
+
+    return QtG.QImage(
+        cv2_img.data,
+        width,
+        height,
+        bytes_per_line,
+        QtG.QImage.Format_RGB888 if not is_grayscale else QtG.QImage.Format_Grayscale8
+    )
+
+
 class ImageViewingWindow(QtW.QWidget):
     def __init__(self, cv2_img) -> None:
         super().__init__()
@@ -243,6 +263,7 @@ class ImageViewingWindow(QtW.QWidget):
         self.image_viewer_label.setPixmap(QtG.QPixmap.fromImage(self.image))
 
         self.hbox_row_1 = QtW.QHBoxLayout()
+        self.hbox_row_1.addWidget(self.self.results_text_box)
         self.hbox_row_1.addStretch()
         self.hbox_row_1.addWidget(self.image_viewer_label)
         self.hbox_row_1.addStretch()
@@ -274,13 +295,16 @@ class MainWindow(QtW.QMainWindow):
         self.vbox.addLayout(self.hbox_row_2)
         self.vbox.addLayout(self.hbox_row_3)
 
-
         self.image_filename = None
         self.image = QtG.QImage()
         self.scaled_image = QtG.QImage()
         self.image_viewer_label = QtW.QLabel("")
         self.image_viewer_label.installEventFilter(self)
         self.image_viewer_label.setPixmap(QtG.QPixmap.fromImage(self.image))
+
+        self.results_label = QtW.QLabel()
+
+        self.hbox_row_1.addWidget(self.results_label)
         self.hbox_row_1.addStretch()
         self.hbox_row_1.addWidget(self.image_viewer_label)
         self.hbox_row_1.addStretch()
@@ -320,19 +344,40 @@ class MainWindow(QtW.QMainWindow):
         np_array = np.asarray(bytearray(byte_array.data()), dtype="uint8")
         cv2_img = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
 
+        width, height = self.image.width(), self.image.height()
+
+        top_pad = 0
+        bottom_pad = 0
+        left_pad = 0
+        right_pad = 0
+        if width % 32 != 0:
+            next_32_width = ((width // 32) + 1) * 32
+            if (next_32_width - width) % 2 != 0:
+                left_pad = ((next_32_width - width) // 2) + 1
+                right_pad = ((next_32_width - width) // 2)
+        if height % 32 != 0:
+            next_32_height = ((height // 32) + 1) * 32
+            if (next_32_height - height) % 2 != 0:
+                top_pad = ((next_32_height - height) // 2) + 1
+                bottom_pad = ((next_32_height - height) // 2)
+
+        cv2_img = cv2.copyMakeBorder(cv2_img, top_pad, bottom_pad, left_pad, right_pad, cv2.BORDER_CONSTANT, value=0)
         cv2_ocr_img, cv2_mask_img, info = id_card_ocr(cv2_img, 60, 60, "ssd", "EasyOcr")
 
         label_text_list = []
         for id, val in info.items():
             label_text_list.append("{}: {}".format(id, val))
 
-        self.image_viewer_label.setText("\n".join(label_text_list))
+        self.results_label.setText("\n".join(label_text_list))
 
-        self.ocr_viewer = ImageViewingWindow(cv2_ocr_img)
-        self.mask_viewer = ImageViewingWindow(cv2_mask_img)
+        qimg_ocr = cv2_img_to_QImage(cv2_ocr_img)
+        self.image_viewer_label.setPixmap(QtG.QPixmap.fromImage(get_scaled_image(qimg_ocr)))
 
-        self.ocr_viewer.show()
-        self.mask_viewer.show()
+        # self.ocr_viewer = ImageViewingWindow(cv2_ocr_img)
+        # self.mask_viewer = ImageViewingWindow(cv2_mask_img)
+
+        # self.ocr_viewer.show()
+        # self.mask_viewer.show()
 
 
 def main():

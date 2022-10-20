@@ -11,3 +11,4 @@ tensorflow == 2.10.0
 dlib == 19.24.0
 pyside2 == 5.15.2.1
 scikit-learn == 1.1.2
+tesseract == 0.1.3
