@@ -24,7 +24,7 @@ def createHeatMapAndBoxCoordinates(image):
     the box coordinates of the characters in the image.
     """
     input_image = image.copy()
-    craft = Craft(output_dir='outputs', crop_type="poly", cuda=True)
+    craft = Craft(output_dir='outputs', crop_type="poly", cuda=False)
     prediction_result = craft.detect_text(input_image)
     heatmaps = prediction_result["heatmaps"]
    
