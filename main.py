@@ -227,7 +227,7 @@ if '__main__' == __name__:
         plt.show()
 
 
-    print("Execution Time:", (end -start))
+    print("Execution Time:", (end - start))
 
 
 
