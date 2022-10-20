@@ -3,6 +3,7 @@
 * Clone the repo and cd into it
 * First Make a virtual environment `python3 -m venv venv`
 * Activate the environment `source ./venv/bin/activate`
+* Install wheel `pip3 install wheel` (important)
 * Install all dependencies `pip3 install -r requirements.txt`
 * Run `python3 ./main_gui.py`
 
