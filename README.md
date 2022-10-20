@@ -1,19 +1,26 @@
 # Usage
+### How to Run
+* Clone the repo and cd into it
+* First Make a virtual environment `python3 -m venv venv`
+* Activate the environment `source ./venv/bin/activate`
+* Install all dependencies `pip3 install -r requirements.txt`
+* Run `python3 ./main_gui.py`
+
 ### Arguments
 * `--folder_name`: folder path
-* `--neighbor_box_distance`: Nearest box distance 
+* `--neighbor_box_distance`: Nearest box distance
 * `--face_recognition`: Face recognition method (dlib, ssd, haar)
 * `--rotation_interval`: Id card rotation interval in degrees
 * `--ocr_method`: ocr method (EasyOcr and TesseractOcr)
 
 In Dlib and Haar face detection model, it is better to choose a rotation angle of less than 30 degrees, otherwise no face may be detected due to image inversion.
 Create a folder and put the ID card images in that folder
-``` 
+```
 git clone git@github.com:musimab/Tc_ID_Card_OCR.git
 mkdir images
-``` 
+```
 
-``` 
+```
 python3 main.py --folder_name "images" --neighbor_box_distance 60 --face_recognition ssd --ocr_method EasyOcr --rotation_interval 60
 ```
 
@@ -65,13 +72,13 @@ The accuracy of the optical character system was evaluated according to 2 differ
 
 The evaluate.py function retrieves the predicted and actual values in json format
 
-###  Character Level Comparision  
+###  Character Level Comparision
 1. tc: 1303 / 1327  => 98.19 %
 2. surname: 805 / 816 => 98.65 %
-3. name: 742 / 746 => 99.46 % 
-4. dateofbirth: 976 / 976 => 100.0 % 
+3. name: 742 / 746 => 99.46 %
+4. dateofbirth: 976 / 976 => 100.0 %
 
-###  Word Level Comparision  
+###  Word Level Comparision
 1. tc : 0.96 %
 2. surname : 0.91 %
 3. name : 0.95 %
