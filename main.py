@@ -213,17 +213,16 @@ if '__main__' == __name__:
         utlis.displayAllBoxes(final_img, bbox_coordinates)
 
 
-        plt.title("final_img")
-        plt.imshow(final_img)
+        #plt.title("final_img")
+        #plt.imshow(final_img)
         #plt.imsave("final_imgp.jpg",final_img)
         #cv2.imwrite("predicted_mask.jpg", final_img)
-        plt.show()
-
+        #plt.show()
 
         plt.title("Predicted Mask")
         plt.imshow(predicted_mask, cmap='gray')
         #plt.imsave("predicted_mask.jpg", predicted_mask)
-        #cv2.imwrite("predicted_mask.jpg", predicted_mask)
+        #cv2.imwrite("predicted_mask.png", predicted_mask, cv2.IMWRITE_GRAYSC)
         plt.show()
 
 
